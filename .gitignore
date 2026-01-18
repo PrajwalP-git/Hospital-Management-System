@@ -2,3 +2,4 @@
 
 db.sqlite3   # Django db
 /db.sqlite3
+/.env
