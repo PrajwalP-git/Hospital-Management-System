@@ -40,24 +40,42 @@ class Appointment(models.Model):
 
         #ignore cancelled appointments
         qs = Appointment.objects.filter(
-            appointment_date = self.appointment_date,
-            status = "SCHEDULED"
-        ).exclude(id=self.id)
+            doctor=self.doctor,
+            status = "SCHEDULED",
+            start_time__lt=self.end_time,
+            end_time__gt=self.start_time
+        )
 
+        def clean(self):
+            if self.status !="Scheduled":
+                return
+            if self.status == "Completed":
+                return
         #doctor conflict
-        if qs.filter(
+        qs = Appointment.objects.filter(
             doctor=self.doctor,
             start_time__lt=self.end_time,
             end_time__gt=self.start_time
-        ).exists():
+        )
+
+        if self.pk:
+            qs = qs.exclude(pk=self.pk)
+        if qs.exists():
             raise ValidationError("Doctor already has an appointment in this time")
 
+        def clean(self):
+            if self.status !="Scheduled":
+                return
         #patient conflict
-        if qs.filter(
+        qs = Appointment.objects.filter(
             patient=self.patient,
             start_time__lt=self.end_time,
             end_time__gt=self.start_time
-        ).exists():
+        )
+
+        if self.pk:
+            qs = qs.exclude(pk=self.pk)
+        if qs.exists():
             raise ValidationError("Patient already has an appointment in this time")
 
         def __str__(self):

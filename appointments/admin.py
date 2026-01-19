@@ -16,5 +16,4 @@ class AppointmentAdmin(admin.ModelAdmin):
     search_fields = ("patient_name","doctor_user_username")
 
     def save_model(self, request, obj, form, change):
-        obj.full_clean() #enforces conflict rules
         super().save_model(request,obj,form,change)
